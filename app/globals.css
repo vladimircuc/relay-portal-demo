@@ -1,26 +1,67 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Relay — dark, security-portfolio aesthetic. */
+@theme {
+  --color-bg: #0a0e13;
+  --color-bg-2: #0d131a;
+  --color-surface: #111922;
+  --color-surface-2: #16202b;
+  --color-border: #1f2a36;
+  --color-border-2: #2a3a49;
+  --color-ink: #e8eef5;
+  --color-dim: #93a1b3;
+  --color-faint: #5e6b7a;
+  --color-accent: #35d6c2;
+  --color-accent-2: #5b9dff;
+  --color-crit: #ff5d6c;
+  --color-good: #43d59a;
+  --color-warn: #f5c451;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --radius-card: 14px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(1200px 600px at 70% -10%, color-mix(in oklab, var(--color-accent) 9%, transparent), transparent 60%),
+    radial-gradient(900px 500px at 10% 0%, color-mix(in oklab, var(--color-accent-2) 8%, transparent), transparent 55%),
+    var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle mono label treatment used for eyebrows + code chips. */
+.kicker {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.card {
+  background: linear-gradient(180deg, color-mix(in oklab, var(--color-surface) 96%, white 0%), var(--color-surface));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+
+.card-hover {
+  transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+}
+.card-hover:hover {
+  border-color: var(--color-border-2);
+  transform: translateY(-2px);
+}
+
+a { color: inherit; }
+
+::selection {
+  background: color-mix(in oklab, var(--color-accent) 35%, transparent);
 }
