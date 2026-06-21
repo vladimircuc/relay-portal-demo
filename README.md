@@ -1,46 +1,70 @@
-# Relay — Security Case Study
+# Relay
 
-An interactive security walkthrough of a **multi-tenant social-media management
-platform**, built as a cybersecurity portfolio piece. Relay is a faithful **mock**
-of a production SaaS — synthetic data, no real backend, not affiliated with any
-employer's production system — rebuilt so every section can explain the engineering
-and, above all, the **security** behind it.
+**An interactive, navigable mock of a multi-tenant marketing-analytics dashboard —
+built as a cybersecurity portfolio piece.**
 
-The goal: a hiring manager can browse it, click into any section, and — wherever
-possible — **try the attack and watch the defense hold**.
+Relay is a faithful clone of a production SaaS I built and secured: a platform
+agencies use to report ad spend, lead funnels, social growth and SEO to their
+clients, connected to Meta, TikTok, YouTube, LinkedIn and Google. This version runs
+on **synthetic data with no real backend** — so you can click through the whole
+product safely, and every place there *was* real functionality explains how it was
+actually built and secured.
 
-## What it demonstrates
+> Synthetic data. No real platform connections. Not affiliated with any employer's
+> production system.
 
-- **Multi-tenant isolation with Postgres RLS** — one tenant physically cannot read
-  another's rows; the database enforces it.
-- **Passwordless auth** — Google OAuth + email magic link, domain + per-email
-  allowlists. No password store to leak.
-- **OAuth grants, tenant-bound** — connecting Meta / TikTok / YouTube / LinkedIn
-  signs the client id into an HMAC'd state (server-only secret, PKCE where
-  supported); a forged callback can't repoint a grant.
-- **Encrypted token vault** — access/refresh tokens encrypted at rest, never shipped
-  to the browser.
-- **Secure SDLC with AI** — built fast with AI assistance, then adversarially
-  reviewed (multi-agent audit + self-pentest), with CI guards that fail the build on
-  a security regression.
-- **Hardened & inspectable** — the site itself ships strict security headers and a
-  deny-framing policy. Open devtools; the claims are verifiable.
+## How to explore it
 
-## Interactive demos (in progress)
+- **Log in** — the buttons just drop you in (no real auth here). An ⓘ explains the
+  real passwordless flow.
+- **Pick a client** — the super-admin view lists every tenant.
+- **Use the dashboard** — Overview, Paid Ads, Social, Connect, Security Lab.
+- **Look for the ⓘ "How I built this" buttons** — on the data pipeline, the OAuth
+  connect flow, the report builder, token storage and access control. Each one is a
+  short note on the real production implementation + the security around it.
+- **Open the Security Lab** — hands-on demos where you run an attack and watch the
+  defense hold.
 
-1. **Vault REVOKE time-machine** — call a secret-decryption RPC as anon; flip the
-   grant from drifted to locked and watch the same request go from leaking a token
-   to *permission denied*.
-2. **Cross-tenant fetch wall** — edit the client id in a request and watch RLS 403 it.
-3. **OAuth state-forgery bench** — real in-browser HMAC-SHA256 rejects a tampered /
-   replayed state.
-4. **Security-headers scanner** — live before/after headers + a clickjacking iframe
-   blocked by `frame-ancestors`.
+## The security story
+
+The product is genuinely multi-tenant and security-sensitive (it holds OAuth tokens
+for every client). The real build emphasizes:
+
+- **Multi-tenant isolation with Postgres RLS** — a tenant physically cannot read
+  another's rows; the database filters them, not the app.
+- **Passwordless auth** — Google OAuth + email magic link, access by company-domain
+  rules and a per-email allowlist, identity always re-derived from a server-validated
+  session.
+- **OAuth grants bound to a tenant** — the `state` is HMAC-signed with a server-only
+  secret and carries the client id (PKCE where supported), so a forged or replayed
+  callback can't repoint a grant. Tokens are stored **encrypted in a vault**, never
+  shipped to the browser.
+- **Defense in depth** — constant-time secret comparison, SSRF-guarded server-side
+  fetches, attribute-context output escaping, strict security headers.
+
+It also includes an honest centerpiece: **a real audit of the production codebase
+found a critical issue** — three `SECURITY DEFINER` secret-decryption functions had
+drifted to being callable by anonymous users, exposing every tenant's OAuth tokens.
+I fixed it (restored least-privilege the correct way) and added a **CI guard** that
+fails the build if any privileged function is ever exposed to anon/authenticated
+again. The **Vault REVOKE time-machine** demo lets you replay it.
+
+## Interactive demos (Security Lab)
+
+- **Vault REVOKE time-machine** ✅ — call the decryption RPC as anon, flip the grant
+  drifted → locked, watch it go from leaking a token to `42501 permission denied`.
+- **Cross-tenant fetch wall** ✅ — change the `client_id` in a request and watch RLS
+  return an empty set for a tenant your token can't access.
+- **OAuth state-forgery bench** ⏳ — real in-browser HMAC-SHA256 rejecting a tampered
+  or replayed state.
+- **Security-headers scanner** ⏳ — live before/after headers + a clickjacking iframe
+  blocked by `frame-ancestors`.
 
 ## Stack
 
-Next.js 16 (App Router) · TypeScript · Tailwind v4 · deployed on Vercel. Synthetic
-data; an optional throwaway Supabase project powers the live RLS demo.
+Next.js 16 (App Router) · TypeScript · Tailwind v4 · deployed on Vercel. Dependency-
+free SVG charts. The interactive demos use in-browser logic; an optional throwaway
+Supabase project can later back the RLS demo with a real database.
 
 ## Local development
 
