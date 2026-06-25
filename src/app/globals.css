@@ -1,0 +1,690 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   Relay brand tokens
+   ============================================================================= */
+
+:root {
+  /* Brand colors */
+  --ps-black:        #000000;
+  --ps-yellow:       #ff6a00;
+  --ps-yellow-soft:  #ff8a3d;
+  --ps-yellow-dim:   #c2410c;
+  --ps-off-white:    #f2f2f2;
+
+  /* Accent used as FOREGROUND (text/icon) on neutral surfaces. On dark it's
+     the brand yellow (legible on near-black); the light theme overrides it to
+     near-black ink, because thin yellow text/icons wash out on white. Use
+     text-[var(--accent-fg)] in place of text-[var(--ps-yellow)] for any such
+     case — fills, borders, glows and chart strokes keep using --ps-yellow. */
+  --accent-fg:       var(--ps-yellow);
+
+  /* Like --accent-fg, but STAYS brand yellow on BOTH themes instead of
+     flipping to ink on the light theme. The light block just deepens it
+     (below) so it still reads on white. For headline accents we want yellow on
+     white too — currently the ROAS hero number. */
+  --accent-strong:   var(--ps-yellow);
+
+  /* Dark-theme surface scale (analytics dashboards) */
+  --surface-0:       #0a0a0a;   /* page background */
+  --surface-1:       #141414;   /* card */
+  --surface-2:       #1f1f1f;   /* card hover / elevated */
+  --surface-3:       #2a2a2a;   /* borders, dividers */
+
+  /* Text scale */
+  --text-primary:    #f2f2f2;
+  --text-secondary:  #a3a3a3;
+  --text-tertiary:   #6b6b6b;
+  --text-on-yellow:  #000000;
+
+  /* Semantic */
+  --positive:        #22c55e;
+  --negative:        #ef4444;
+  --warning:         #f59e0b;
+  --neutral:         #6b6b6b;
+
+  /* Overlays / effects — referenced by components so they adapt per theme.
+     (Dark values; the light theme overrides these below.) */
+  --scrim:           rgba(0, 0, 0, 0.6);     /* modal / popover backdrops */
+  --tooltip-bg:      #1f1f1f;                 /* chart + hover tooltips */
+  --tooltip-border:  #2a2a2a;
+  --sheen:           rgba(255, 255, 255, 0.04); /* faint top-edge highlight on cards */
+  --sweep:           rgba(255, 255, 255, 0.06); /* diagonal light sweep across a card on hover */
+  --skeleton-sheen:  rgba(255, 106, 0, 0.10);   /* shimmer sweep over .ps-skeleton */
+  --focus-ring:      var(--ps-yellow);          /* keyboard focus outline */
+  --heatmap-empty:   rgba(255, 255, 255, 0.045); /* zero-value posting-cadence cell */
+
+  /* Chart ramp — brand yellow, off-white, then descending grays. Matches the
+     historical Source-/Content-breakdown palette verbatim so dark mode is
+     visually unchanged. Read at runtime via useChartColors(). */
+  --chart-1:         #ff6a00;
+  --chart-2:         #f2f2f2;
+  --chart-3:         #9c9c9c;
+  --chart-4:         #6b6b6b;
+  --chart-5:         #4a4a4a;
+  --chart-6:         #3a3a3a;
+  --chart-other:     #2a2a2a;
+
+  /* ClientLogo chip backings. The logo's "ink" (light / dark / solid) is
+     classified client-side; we paint a CONTRASTING chip only on the theme
+     where the artwork would otherwise blend into the page (a white logo on
+     the light page, a dark logo on the dark page). These two backings are
+     theme-independent — a dark chip is dark on both themes — so they live in
+     :root and aren't overridden in the light block below. */
+  --logo-chip-dark-bg:      #1f1f23;          /* behind light / white artwork */
+  --logo-chip-dark-border:  #2e2e34;
+  --logo-chip-light-bg:     #ffffff;          /* behind dark artwork */
+  --logo-chip-light-border: rgba(0, 0, 0, 0.14);
+
+  /* Spacing rhythm — generous, per brand guide */
+  --gap-card:        1.5rem;    /* 24px between cards */
+  --pad-card:        1.5rem;    /* 24px inside cards */
+  --radius-card:     7px;  /* uniform 7px corners dashboard-wide */
+}
+
+/* =============================================================================
+   Light theme — overrides the surface / text / semantic / effect tokens above.
+   Set on <html data-theme="light"> by the pre-hydration script in layout.tsx
+   (cookie ps_theme, else OS prefers-color-scheme). Brand colors (yellow / black
+   ink) and spacing are inherited from :root unchanged. Every component that
+   reads these vars adapts for free; the de-hardcoded chart/scrim/logo values
+   below keep contrast on white.
+   ============================================================================= */
+:root[data-theme="light"] {
+  /* Surface scale — page is a hair off-white so white cards lift off it. */
+  --surface-0:       #f5f5f6;   /* page background */
+  --surface-1:       #ffffff;   /* card */
+  --surface-2:       #ececef;   /* card hover / elevated */
+  --surface-3:       #e2e2e6;   /* borders, dividers */
+
+  /* Text scale — near-black primary (softer than pure #000), descending. */
+  --text-primary:    #18181b;
+  --text-secondary:  #52525b;
+  --text-tertiary:   #71717a;
+
+  /* Accent-as-foreground → near-black ink on white (see the :root note). */
+  --accent-fg:       var(--text-primary);
+  /* --accent-strong keeps the brand yellow on white (unlike --accent-fg),
+     just deepened for legibility on the white card — the same move the chart
+     ramp makes (--chart-1 is #e8590c here vs #ff6a00 on dark). */
+  --accent-strong:   #e8590c;
+
+  /* Semantic — deepened so they hold AA contrast on white. */
+  --positive:        #16a34a;
+  --negative:        #dc2626;
+  --warning:         #d97706;
+  --neutral:         #71717a;
+
+  /* Overlays / effects */
+  --scrim:           rgba(24, 24, 27, 0.45);
+  --tooltip-bg:      #ffffff;
+  --tooltip-border:  #e2e2e6;
+  --sheen:           rgba(255, 255, 255, 0);    /* no top sheen on light cards */
+  --sweep:           rgba(0, 0, 0, 0.05);        /* a faint dark sweep reads on white cards */
+  --skeleton-sheen:  rgba(0, 0, 0, 0.06);       /* darker sweep reads on light gray */
+  --focus-ring:      var(--ps-yellow-dim);      /* darker yellow for contrast on white */
+  --heatmap-empty:   rgba(0, 0, 0, 0.05);       /* faint dark cell on the light page */
+
+  /* Chart ramp — yellow leads, then near-black (the high-contrast partner,
+     mirroring dark's off-white), then descending light grays that still
+     register against a white card. */
+  --chart-1:         #e8590c;
+  --chart-2:         #18181b;
+  --chart-3:         #71717a;
+  --chart-4:         #a1a1aa;
+  --chart-5:         #b8b8be;
+  --chart-6:         #cfcfd4;
+  --chart-other:     #d4d4d8;
+}
+
+/* ClientLogo chip — artwork-aware backing. ClientLogo classifies the logo's
+   ink client-side and sets data-ink="light|dark|solid"; we only paint a
+   contrasting chip (plus a hair of inset padding via the --logo-size px var)
+   on the theme where the artwork would otherwise vanish into the page. Until
+   classification lands — or if the image can't be sampled cross-origin —
+   data-ink stays "light", reproducing the prior behavior (dark chip on the
+   light theme only). Padding must resolve to a LENGTH, not a percentage:
+   percentage padding on this flex box (with a w-full/h-full <img>) collapses
+   the image to zero width. */
+
+/* light / white artwork → vanishes on the light page: back it with dark. */
+:root[data-theme="light"] .ps-logo-chip[data-ink="light"] {
+  background: var(--logo-chip-dark-bg);
+  box-shadow: inset 0 0 0 1px var(--logo-chip-dark-border);
+  padding: calc(var(--logo-size, 0px) * 0.1);
+}
+/* dark artwork → vanishes on the dark page: back it with light. */
+:root:not([data-theme="light"]) .ps-logo-chip[data-ink="dark"] {
+  background: var(--logo-chip-light-bg);
+  box-shadow: inset 0 0 0 1px var(--logo-chip-light-border);
+  padding: calc(var(--logo-size, 0px) * 0.1);
+}
+/* solid artwork (its own background) → just a hairline edge so a near-white
+   tile reads as bounded on the light page; no fill, no padding. */
+.ps-logo-chip[data-ink="solid"] {
+  box-shadow: inset 0 0 0 1px var(--surface-3);
+}
+
+@theme inline {
+  --color-background: var(--surface-0);
+  --color-foreground: var(--text-primary);
+
+  --color-surface-0: var(--surface-0);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+
+  --color-text-primary:   var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary:  var(--text-tertiary);
+
+  --color-brand:         var(--ps-yellow);
+  --color-brand-soft:    var(--ps-yellow-soft);
+  --color-brand-dim:     var(--ps-yellow-dim);
+  --color-brand-ink:     var(--text-on-yellow);
+
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  --color-warning:  var(--warning);
+
+  --font-sans:    var(--font-montserrat), Montserrat, ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-montserrat), Montserrat, ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Mono", monospace;
+
+  --radius-card: var(--radius-card);
+
+  /* Uniform 7px corner radius across the whole dashboard (Vlad: pointy was too
+     sharp, the old 14px too round). Overrides Tailwind's rounded-{xs..3xl}
+     scale so every rounded-* utility resolves to 7px. rounded-full (circles:
+     avatars, dots, the donut, thin progress bars) and rounded-none are left
+     untouched. */
+  --radius-xs:  7px;
+  --radius-sm:  7px;
+  --radius-md:  7px;
+  --radius-lg:  7px;
+  --radius-xl:  7px;
+  --radius-2xl: 7px;
+  --radius-3xl: 7px;
+}
+
+* {
+  border-color: var(--surface-3);
+}
+
+html, body {
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11", "tnum";  /* tabular numerals for numbers */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Make all numbers render in tabular figures so columns line up */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* =============================================================================
+   Skeleton shimmer — a soft horizontal sweep across placeholder blocks.
+   Replaces the default `animate-pulse` (which just oscillates opacity) with
+   a directional gradient that feels more like content is "incoming". Tuned
+   slow (2.4s) so it whispers rather than flickers.
+   ============================================================================= */
+
+.ps-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-2);
+  isolation: isolate;  /* contain the sweep to this element */
+}
+.ps-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* The sweep — a soft theme-aware highlight passing left-to-right
+     (brand-tinted on dark, a faint darkening on light). */
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--skeleton-sheen) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: ps-shimmer 2.4s ease-in-out infinite;
+}
+@keyframes ps-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ps-skeleton::after { animation: none; }
+}
+
+/* Ranked-list bar grow-in. Driven by a scaleX transform (not a JS width gate),
+   so the bar's resting width is always its real value — it renders full-width
+   synchronously / on SSR and degrades to a static full bar under reduced-motion;
+   the animation only adds a left-anchored sweep-out on mount. */
+@keyframes ps-bar-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.ps-bar-grow {
+  transform-origin: left center;
+  animation: ps-bar-grow 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ps-bar-grow { animation: none; }
+}
+
+/* Staggered fade/slide-in for list rows (e.g. the Local SEO competitors table).
+   Per-row delay is set inline via animation-delay. */
+@keyframes ps-row-in {
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: none; }
+}
+.ps-row-in {
+  animation: ps-row-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ps-row-in { animation: none; }
+}
+
+/* Hover popup on the Local SEO map — quick fade in (positioning/centering is
+   handled by Tailwind translate utilities, so the keyframe only touches opacity
+   to avoid clobbering the transform). */
+@keyframes ps-pop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.ps-pop-in {
+  animation: ps-pop-in 0.13s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ps-pop-in { animation: none; }
+}
+
+/* =============================================================================
+   Collapsible disclosure (native <details>/<summary>) — used by the admin
+   pipeline section so the stage-mapping table can shrink to a summary line
+   when not actively being edited. Hides the default disclosure triangle and
+   rotates a chevron icon based on the [open] attribute instead.
+   ============================================================================= */
+
+.ps-collapse summary {
+  list-style: none;
+  cursor: pointer;
+}
+.ps-collapse summary::-webkit-details-marker {
+  display: none;
+}
+.ps-collapse-chevron {
+  transition: transform 180ms ease;
+}
+.ps-collapse[open] .ps-collapse-chevron {
+  transform: rotate(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ps-collapse-chevron { transition: none; }
+}
+
+/* =============================================================================
+   Top progress bar — a thin yellow line that runs across the very top of
+   the page during pending route transitions / refreshes. Lightweight enough
+   that we can mount it permanently and just toggle a class to animate.
+   ============================================================================= */
+
+.ps-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 100;
+  background: transparent;
+  pointer-events: none;
+  overflow: hidden;
+}
+.ps-progress > span {
+  display: block;
+  height: 100%;
+  width: 0;
+  /* Solid brand-yellow with a slightly brighter leading edge so the head
+     reads clearly against the dark bar — clean, no glow. */
+  background: linear-gradient(90deg, var(--ps-yellow), #ff9e5c);
+  border-radius: 0 2px 2px 0;
+  opacity: 0;
+  transition: opacity 160ms ease-out;
+}
+/* On the white theme the brand-yellow fill is essentially invisible (yellow on
+   white is ~1.1:1 contrast), so the bar reads as "not there." Swap it to
+   near-black ink — the same accent→ink move the rest of the light theme makes
+   via --accent-fg — with a slightly lighter leading edge so the head still
+   reads. Dark theme keeps the branded yellow above. */
+:root[data-theme="light"] .ps-progress > span {
+  background: linear-gradient(90deg, var(--text-primary), #3f3f46);
+}
+/* Determinate head-start: rush out fast then crawl, like nprogress, so every
+   navigation shows obvious forward motion within the first moments. It never
+   "completes" on its own — TopProgress flips data-active off when the route
+   resolves and the bar fades out. */
+.ps-progress[data-active="true"] > span {
+  opacity: 1;
+  animation: ps-progress-grow 14s cubic-bezier(0.12, 0.78, 0.18, 1) forwards;
+}
+@keyframes ps-progress-grow {
+  0%   { width: 0; }
+  10%  { width: 35%; }
+  35%  { width: 62%; }
+  70%  { width: 84%; }
+  100% { width: 94%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ps-progress > span { transition: none; }
+  .ps-progress[data-active="true"] > span { animation: none; width: 90%; }
+}
+
+/* =============================================================================
+   View Transitions — crossfade between dashboard pages (e.g. client switch).
+   The browser captures snapshots of the old + new pages and we control how
+   they cross. Default browser behavior is fine; we just lengthen + soften it.
+   ============================================================================= */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 280ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-old(root) {
+  animation-name: ps-vt-fade-out;
+}
+::view-transition-new(root) {
+  animation-name: ps-vt-fade-in;
+}
+@keyframes ps-vt-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes ps-vt-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+/* =============================================================================
+   Theme toggle — circular reveal. When the light/dark toggle fires, the
+   ThemeProvider adds `.theme-vt` to <html> and drives a clip-path circle on
+   the NEW snapshot via WAAPI (expanding out from the button). We disable the
+   default crossfade for this case so the two animations don't fight: the old
+   theme sits underneath, fully painted, while the new theme is wiped over it.
+   Reduced-motion is handled in JS (we skip startViewTransition entirely), so
+   no media query is needed here.
+   ============================================================================= */
+html.theme-vt::view-transition-old(root),
+html.theme-vt::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html.theme-vt::view-transition-old(root) { z-index: 0; }
+html.theme-vt::view-transition-new(root) { z-index: 1; }
+
+/* Focus ring matches brand — but only on truly interactive elements, never
+   on chart SVG paths/sectors which are non-actionable */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Hard-kill any default focus rings inside Recharts surfaces — they bake
+   tabindex into chart layers, which makes the browser draw the system focus
+   ring (the blue square) when you click a segment. */
+.recharts-wrapper *,
+.recharts-surface *,
+.recharts-wrapper *:focus,
+.recharts-surface *:focus,
+.recharts-wrapper *:focus-visible,
+.recharts-surface *:focus-visible {
+  outline: none !important;
+}
+.recharts-wrapper,
+.recharts-surface {
+  outline: none !important;
+}
+
+::selection {
+  background: var(--ps-yellow);
+  color: var(--text-on-yellow);
+}
+
+/* =============================================================================
+   react-day-picker overrides — high-specificity to defeat the bundled default
+   theme (which loads after globals on Turbopack). Tightly scoped to .ps-calendar
+   so we don't affect anything else.
+   ============================================================================= */
+
+.ps-calendar.rdp-root {
+  --rdp-accent-color: var(--ps-yellow);
+  --rdp-accent-background-color: color-mix(in oklab, var(--ps-yellow) 22%, transparent);
+  --rdp-background-color: transparent;
+  --rdp-day-height: 36px;
+  --rdp-day-width: 36px;
+  --rdp-day_button-height: 30px;
+  --rdp-day_button-width: 30px;
+  --rdp-day_button-border-radius: 6px;
+  --rdp-selected-border: none;
+  --rdp-disabled-opacity: 0.25;
+  --rdp-today-color: var(--ps-yellow);
+  --rdp-weekday-text-transform: uppercase;
+  --rdp-range_middle-background-color: color-mix(in oklab, var(--ps-yellow) 16%, transparent);
+  --rdp-range_middle-color: var(--text-primary);
+  --rdp-range_start-color: var(--text-on-yellow);
+  --rdp-range_end-color: var(--text-on-yellow);
+  --rdp-range_start-background: var(--ps-yellow);
+  --rdp-range_end-background: var(--ps-yellow);
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+}
+
+.ps-calendar .rdp-months {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 1.5rem;
+}
+
+.ps-calendar .rdp-month_caption {
+  color: var(--text-primary) !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  padding-bottom: 0.75rem !important;
+  /* Reserve right-side space to clear the < > nav arrows that sit at
+     the top-right of the calendar. Without this, long labels like
+     "January 2026" crash into the left arrow. We pad BOTH months so
+     the two labels look consistently positioned. */
+  padding-right: 60px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+/* "October 2026" label — guaranteed visible since we switched away from
+   the dropdown captionLayout. The label is the readable header above
+   each month grid; users can still navigate with the chevron arrows. */
+.ps-calendar .rdp-caption_label {
+  display: inline-flex !important;
+  align-items: center !important;
+  color: var(--text-primary) !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+}
+
+.ps-calendar .rdp-weekday {
+  color: var(--text-tertiary) !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.06em !important;
+}
+
+.ps-calendar .rdp-day_button {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.ps-calendar .rdp-day:not(.rdp-disabled):not(.rdp-selected):hover .rdp-day_button {
+  background: var(--surface-2) !important;
+}
+
+/* Selected day(s) — yellow fill, black text, brand colors */
+.ps-calendar .rdp-selected .rdp-day_button,
+.ps-calendar .rdp-range_start .rdp-day_button,
+.ps-calendar .rdp-range_end .rdp-day_button {
+  background: var(--ps-yellow) !important;
+  color: var(--text-on-yellow) !important;
+  font-weight: 600 !important;
+  border: none !important;
+}
+
+/* Middle of the selected range — dim yellow fill, normal text */
+.ps-calendar .rdp-range_middle {
+  background: color-mix(in oklab, var(--ps-yellow) 18%, transparent) !important;
+  border-radius: 0 !important;
+}
+.ps-calendar .rdp-range_middle .rdp-day_button {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+  font-weight: 500 !important;
+  border-radius: 0 !important;
+}
+.ps-calendar .rdp-range_start {
+  border-radius: 6px 0 0 6px !important;
+}
+.ps-calendar .rdp-range_end {
+  border-radius: 0 6px 6px 0 !important;
+}
+/* When the same day is both range_start AND range_end (collapsed range —
+   after the first click, before the second), give it a full pill shape
+   instead of competing half-rounded sides. */
+.ps-calendar .rdp-range_start.rdp-range_end {
+  border-radius: 6px !important;
+}
+
+/* Today — yellow ring, not fill, when not selected */
+.ps-calendar .rdp-today:not(.rdp-selected) .rdp-day_button {
+  box-shadow: inset 0 0 0 1px var(--ps-yellow) !important;
+  color: var(--ps-yellow) !important;
+}
+
+/* Disabled days */
+.ps-calendar .rdp-disabled {
+  opacity: 0.25;
+}
+.ps-calendar .rdp-disabled .rdp-day_button {
+  cursor: not-allowed;
+  color: var(--text-tertiary) !important;
+}
+
+/* Nav arrows */
+.ps-calendar .rdp-nav {
+  color: var(--text-secondary);
+}
+.ps-calendar .rdp-nav button {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 6px;
+  color: var(--text-secondary) !important;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ps-calendar .rdp-nav button:hover {
+  background: var(--surface-2) !important;
+  color: var(--text-primary) !important;
+}
+.ps-calendar .rdp-chevron {
+  fill: currentColor !important;
+}
+
+/* =============================================================================
+   Security Lab — animation primitives for the interactive attack/defense demos
+   on /security. Sequencing is driven by React state + CSS transitions; these
+   keyframes cover the one-shot effects (a request reaching a gate, a BLOCKED
+   stamp slamming in, a rejection shake, a byte mismatch flash, a scan sweep).
+   All respect prefers-reduced-motion.
+   ============================================================================= */
+@keyframes seclab-stamp {
+  0%   { transform: scale(2.3) rotate(-11deg); opacity: 0; }
+  55%  { transform: scale(0.9) rotate(-11deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-11deg);   opacity: 1; }
+}
+.seclab-stamp { animation: seclab-stamp 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+
+@keyframes seclab-pop {
+  0%   { transform: scale(0.6); opacity: 0; }
+  60%  { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.seclab-pop { animation: seclab-pop 0.34s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@keyframes seclab-shake {
+  0%, 100% { transform: translateX(0); }
+  18% { transform: translateX(-7px); }
+  38% { transform: translateX(6px); }
+  58% { transform: translateX(-4px); }
+  78% { transform: translateX(3px); }
+}
+.seclab-shake { animation: seclab-shake 0.5s ease-in-out both; }
+
+@keyframes seclab-flash {
+  0%   { background-color: transparent; }
+  30%  { background-color: color-mix(in oklab, var(--negative) 30%, transparent); }
+  100% { background-color: transparent; }
+}
+.seclab-flash { animation: seclab-flash 0.7s ease-out both; }
+
+@keyframes seclab-fade-up {
+  from { opacity: 0; transform: translateY(9px); }
+  to   { opacity: 1; transform: none; }
+}
+.seclab-fade-up { animation: seclab-fade-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@keyframes seclab-scan {
+  0%   { transform: translateY(-110%); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(110%); opacity: 0; }
+}
+.seclab-scan { animation: seclab-scan 1.1s ease-in-out both; }
+
+@keyframes seclab-pulse-ring {
+  0%   { box-shadow: 0 0 0 0 color-mix(in oklab, var(--ps-yellow) 55%, transparent); }
+  100% { box-shadow: 0 0 0 14px transparent; }
+}
+.seclab-pulse-ring { animation: seclab-pulse-ring 0.9s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .seclab-stamp, .seclab-pop, .seclab-shake, .seclab-flash,
+  .seclab-fade-up, .seclab-scan, .seclab-pulse-ring { animation: none; }
+}
+
+/* We dropped captionLayout="dropdown" — keeping the related selectors
+   here in case we revisit it later. They're no-ops while we're on
+   captionLayout="label". */
