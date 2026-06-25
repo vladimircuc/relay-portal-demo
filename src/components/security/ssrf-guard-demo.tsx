@@ -170,7 +170,7 @@ function Stage({ on, label, icon, accent, children }: { on: boolean; label: stri
           ? accent
             ? "border-[var(--ps-yellow)]/45 bg-[var(--ps-yellow)]/[0.06]"
             : "border-[var(--surface-3)]/70 bg-[var(--surface-2)]/50"
-          : "border-[var(--surface-3)]/30 bg-[var(--surface-1)] opacity-70")
+          : "border-[var(--surface-3)]/40 bg-[var(--surface-1)]")
       }
     >
       <div className="flex items-center gap-1.5">
