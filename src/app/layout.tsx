@@ -56,14 +56,14 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Relay",
     url: "https://relay.vladimircuc.com",
-    title: "Relay — built with AI, hardened to take a beating",
+    title: "Relay, built with AI and hardened to take a beating",
     description:
       "A full analytics platform built with AI, then hardened until it could take a real beating. It's live, and you're invited to attack it.",
     images: [{ url: "/cover.png", width: 1672, height: 941, alt: "Relay secure analytics dashboard" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Relay — built with AI, hardened to take a beating",
+    title: "Relay, built with AI and hardened to take a beating",
     description:
       "A full analytics platform built with AI, then hardened until it could take a real beating. Come try to break it.",
     images: ["/cover.png"],
