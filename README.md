@@ -7,9 +7,13 @@
 **A full marketing-analytics platform, built with AI in a fraction of the usual time,**
 **then hardened until it could take a real beating. It's live, and you're invited to attack it.**
 
-[![Live app](https://img.shields.io/badge/Live_app-relay.vladimircuc.com-ff6a00?style=for-the-badge)](https://relay.vladimircuc.com)
-&nbsp;
-[![Security Lab](https://img.shields.io/badge/Security_Lab-go_break_it-ff3d2e?style=for-the-badge)](https://relay.vladimircuc.com/security)
+**👇 Both buttons below are clickable. Start with the live app, then come break it in the Lab.**
+
+[![Open the live app](https://img.shields.io/badge/Open_the_live_app-relay.vladimircuc.com-ff6a00?style=for-the-badge)](https://relay.vladimircuc.com)
+&nbsp;&nbsp;
+[![Security Lab](https://img.shields.io/badge/Security_Lab-attack_it-ff3d2e?style=for-the-badge)](https://relay.vladimircuc.com/security)
+
+<br>
 
 ![Next.js](https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
@@ -19,11 +23,6 @@
 
 </div>
 
-> [!TIP]
-> New here? Skip the reading and go straight to the **[Security Lab](https://relay.vladimircuc.com/security)**. You play the attacker, the app fights back, no login needed.
-
----
-
 ## Why I built it
 
 I'm into security, and I wanted to see how far AI-assisted development could actually go. Could you build something this big this fast and still have it hold up when someone comes at it?
@@ -31,8 +30,6 @@ I'm into security, and I wanted to see how far AI-assisted development could act
 Turns out yes, as long as you treat security as its own job instead of an afterthought. **This is me proving that to myself.**
 
 It's a copy of a real product I shipped, rebranded and pointed at a database full of fake data, so the whole thing runs for real but can't hurt anyone.
-
----
 
 ## What it actually does
 
@@ -73,8 +70,6 @@ SEO ──────┘
 - **PDF reports** rendered by a headless browser, branded per client
 - **A real admin surface:** role-based access with scoped permissions, per-client credentials, pipeline mapping, funnel tuning, and a delete that makes you type the name to confirm
 - **Multi-tenant from the ground up,** so one agency's clients can never see another's
-
----
 
 ## 🛡️ The Security Lab
 
@@ -121,8 +116,6 @@ A guard inspects the address before anything happens, sees it points inward, and
 `protocol allow-list` · `private, loopback, and cloud-metadata block on every fetch`
 </details>
 
----
-
 ## What's actually protecting it
 
 It's a copy of a production app, so these are real, shipped controls. Not staged for the lab.
@@ -143,8 +136,6 @@ It's a copy of a production app, so these are real, shipped controls. Not staged
 > [!NOTE]
 > I didn't just hope it was secure. I ran the whole thing through security audits, found **one critical issue and eleven smaller ones,** and fixed and re-checked every one. The lab demos are those exact controls, confirmed working, that you get to test for yourself.
 
----
-
 ## ⚡ The AI part, since it comes up
 
 I built this with Claude, and I built it fast. Work that would normally eat weeks came together in a tiny slice of that.
@@ -153,10 +144,10 @@ The point I care about isn't that AI wrote a lot of the code. It's that the resu
 
 > **Used right, AI isn't a liability. It can move incredibly fast and still stand up to attack.** Relay is the proof I wanted.
 
----
+## Safe by design
 
 > [!IMPORTANT]
-> **Safe by design.** Everything runs on fake data, with no real people, companies, or tokens anywhere. The database is disposable, the public key is public on purpose (the database itself is what enforces access), and the real keys live only in the host's settings, never in this repo. Nothing in the demo writes, so the public version can't be tampered with.
+> Everything runs on fake data, with no real people, companies, or tokens anywhere. The database is disposable, the public key is public on purpose (the database itself is what enforces access), and the real keys live only in the host's settings, never in this repo. Nothing in the demo writes, so the public version can't be tampered with.
 
 ---
 
