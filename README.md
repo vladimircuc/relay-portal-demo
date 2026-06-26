@@ -2,69 +2,83 @@
 
 # Relay
 
-A live demo of an app I built, set up so you can try to break the security yourself and watch it stop you.
+**A real app I built, rigged so you can try to hack it and watch the security stop you.**
 
-**See it live:** https://relay.vladimircuc.com
-**Security demos:** https://relay.vladimircuc.com/security
+Most "I build secure software" claims you just have to take on faith. This one you can test yourself, right now, in your browser.
 
-You don't need an account for the security demos. If you want to look around the actual app, click "Continue with Google" on the login page and it logs you straight in with fake data.
+**Live app:** https://relay.vladimircuc.com
+**Go break it:** https://relay.vladimircuc.com/security
+
+No account needed for the security demos. Want to see the actual product? Hit "Continue with Google" on the login page and you're in. All fake data.
 
 ## What it is
 
-This is a copy of a real marketing-analytics product I built and shipped at work. I rebranded it to "Relay" and pointed it at a throwaway database full of a year's worth of made-up data, so it's safe to put online for anyone to click through. You get the real thing: three services (Ads, Social, Web and SEO), switching between clients, an admin area, the charts, all of it.
+Relay is a real marketing-analytics SaaS I built and shipped at work. I rebranded it and pointed it at a throwaway database loaded with a year of made-up data, so the whole thing is live and clickable but totally harmless. Three full services (Ads, Social, Web and SEO), client switching, an admin panel, charts everywhere.
 
-Nothing here can be changed, though. Any button that would normally save or delete something just opens a small popup that explains what it does in the real product and how it's kept secure. So the public version is impossible to mess up.
+Try to change something and you can't. Every save or delete button just opens a popup explaining what it does in the real product and how it's locked down. Nothing on the public version can be touched.
 
-## Why I made it
+## Why it exists
 
-I'm looking for work in application security and security engineering. Writing "I built a secure app" on a resume doesn't really prove anything, so I wanted to make the security something you can see for yourself.
+I want a job in application security, and "I build secure software" is impossible for anyone to verify. So I made the security something you can attack.
 
-That's what the Security Lab is for. You get to play the attacker. You try the kind of thing a real attacker would try, and you watch where it gets blocked. Each demo lines up with a protection that's in the actual code, and each one is explained in plain words first, with the technical detail underneath if you want it.
+The Security Lab drops you into the attacker's seat. You run the moves a real attacker would run, and you watch each one slam into a wall. Every demo is backed by a control that's actually in the code, written in plain English for anyone, with the real mechanism sitting right underneath for the engineers.
 
-## The security demos
+## The Security Lab
 
-There are three of them, and they all run right in your browser on fake data.
+Three demos. All live, all running in your browser on fake data. Here's what you get to try.
 
-**1. Keeping each client's data separate**
-The app holds a lot of different businesses' data in one database. You log in as someone from one company, then try to pull up a different company's records. The database itself says no and hands back nothing, not even an error, so you can't even tell whether that other company exists. Switch back to your own company and the same request works fine. The rule that keeps everyone's data private lives down in the database, underneath the app, so even a bug in the code or a stolen key can't get around it.
+### Read another company's data
+The app keeps dozens of businesses in one database. You log in as one company and ask for a different company's records.
 
-**2. Faking the login handoff**
-When you connect a social account, the app gives you a kind of signed ticket on the way out and checks it on the way back. You play the attacker and try to change who the ticket is for, or reuse an old one. The demo re-does the actual math right there in your browser (real cryptography, not a stand-in), shows the signature no longer lining up, and rejects it. An attacker can read the ticket but can't forge a new one, because the key used to sign it only ever lives on the server.
+You get nothing back. Not an error. Not "access denied." Just an empty result, like the data was never there, so you can't even tell the other company exists. Switch to your own company and the exact same request returns everything.
 
-**3. Tricking the server into fetching the wrong thing**
-Reports show the client's logo, which gets loaded from a web address someone typed in, so the server goes and fetches that address. You try pointing it at internal things the server should never reach, like the cloud provider's secret-keys service. A check runs first, spots that the address is internal, and refuses to fetch it. This is the same mistake behind the Capital One breach in 2019, so it matters a lot.
+The rule lives inside the database, underneath the app, so a bug in the code or a stolen key still can't reach what it shouldn't. *(Postgres Row-Level Security.)*
 
-## What actually protects the real app
+### Forge a login
+Connecting a social account hands you a signed ticket on the way out to Facebook, and checks it on the way back. You try to rewrite that ticket to point at someone else's account, or replay an old one.
 
-Since this is a copy of a real product, these are protections that already ship with it, not things I bolted on for the demo:
+It doesn't take. The demo runs the real signature check live in your browser with actual cryptography, shows the signature falling apart byte by byte, and throws the whole thing out. You can read the ticket. You can't fake one, because the key that signs it never leaves the server. *(HMAC-signed OAuth state, constant-time check, ten-minute expiry, PKCE on TikTok.)*
 
-- One client can never read another client's data, enforced by the database itself
-- Access tokens are encrypted in a vault, never stored as plain text and never sent to the browser
-- The login handoff is signed, expires after ten minutes, is checked in constant time, and uses PKCE on TikTok
-- Server-side fetches are blocked from reaching internal or cloud-metadata addresses
-- Anything a user typed is escaped before it goes into a generated PDF
-- The background jobs check their secrets in constant time and are rate limited
-- The login flow can only redirect you to approved pages, never an attacker's site
-- Free email domains are blocked when inviting client users
-- Database permissions are locked down, and a CI check fails the build if that ever slips
-- Security headers are set at the edge
+### Point the server at itself
+Reports load the client's logo from a web address someone typed in, so the server goes and fetches it. You feed it an internal address instead: the cloud's secret-keys endpoint, localhost, a private IP.
 
-Before I shipped, I also ran a full security review of the app. It found one critical issue and eleven smaller ones, and I fixed and re-checked every single one.
+A guard inspects the address before anything happens, sees it points inward, and refuses. That exact gap is what leaked over 100 million records in the Capital One breach. *(Protocol allow-list plus a private, loopback, and cloud-metadata block on every server-side fetch.)*
+
+## What's actually protecting it
+
+It's a copy of a production app, so these are real, shipped controls. Not props for the demo.
+
+| Area | What's in place |
+|------|------|
+| **Tenant isolation** | Row-Level Security on every table, enforced by Postgres before any app code runs |
+| **Token storage** | OAuth tokens encrypted in a vault, never in plain SQL, never sent to the browser |
+| **OAuth safety** | Signed state, constant-time verify, ten-minute expiry, PKCE on TikTok |
+| **SSRF** | Private, loopback, and cloud-metadata addresses blocked on every server-side fetch |
+| **Injection** | Anything a user typed is escaped before it reaches the PDF renderer |
+| **Job secrets** | Constant-time secret checks and rate limiting on the background jobs |
+| **Open redirect** | Post-login redirects restricted to approved pages only |
+| **Account hygiene** | Free email domains blocked when inviting client users |
+| **Least privilege** | Locked-down database grants, with a CI check that fails the build if they ever slip |
+| **Edge** | Security headers set in front of the whole app |
+
+Before shipping, I ran a full security review of the app. One critical, eleven smaller. I fixed and re-checked every one.
 
 ## How I built it
 
-The stack is Next.js, TypeScript, Tailwind, and Supabase (Postgres, Auth, and Vault), hosted on Vercel.
+Next.js, TypeScript, Tailwind, and Supabase (Postgres, Auth, Vault), running on Vercel.
 
-I built it with Claude, the AI coding tool, so I could move fast. Then I went back over all of it the way I'd review anyone else's code for security. I ran the review I mentioned above, fixed what it turned up, and added a second layer on top. The demo buttons do nothing in the browser, but the server also refuses to make those changes, so you can't get around it by sending a request by hand either. I made sure no keys or secrets ended up in the repo. The AI helped me write the code quickly, but the security calls were mine. That's really the point of this whole thing. Code gets written fast these days, and the part that still takes a human is making sure it actually holds up.
+I used Claude to build it fast, then went through the whole thing the way I'd go through anyone else's code in a review. Ran the audit, fixed the findings, and added a second layer on top: the demo buttons are dead in the browser, but the server refuses those writes too, so you can't sneak around it with a hand-built request. No keys live in the repo.
 
-## A note on safety
+The AI wrote a lot of the code. The security calls were all mine, and that gap is the whole point of this project. Anyone can generate code fast now. The part that still takes a person is making sure it actually holds up.
 
-- Everything runs on fake data. No real people, companies, or accounts are involved.
-- The database is a disposable one. The public key is supposed to be public (the real protection is the data separation in the database), and the sensitive keys only live in the host's settings, never in this repo.
-- You can't change anything in the demo, so the public version can't be tampered with.
+## Safe by design
 
-## About me
+- Fake data only. No real people, companies, or tokens anywhere.
+- The database is disposable. The public key is supposed to be public (the database itself is what enforces access), and the real keys live only in the host's settings, never in this repo.
+- Nothing in the demo writes, so the public version can't be messed with.
 
-I'm Vladimir Cuc. I'm OSCP+ and Security+ certified, and I'm focused on application security and security engineering.
+## Me
 
-Site: https://vladimircuc.com
+Vladimir Cuc. OSCP+ and Security+ certified, focused on application security and security engineering.
+
+https://vladimircuc.com
