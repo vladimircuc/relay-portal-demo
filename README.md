@@ -2,35 +2,53 @@
 
 # Relay
 
-**A real app I built, rigged so you can try to hack it and watch the security stop you.**
+**A full marketing-analytics platform, built with AI in a fraction of the usual time, then hardened until it could take a real beating. It's live, and you're invited to attack it.**
 
-Most "I build secure software" claims you just have to take on faith. This one you can test yourself, right now, in your browser.
+You don't have to believe any of that. Click around the real thing, then head to the lab and try to break it yourself.
 
 **Live app:** https://relay.vladimircuc.com
 **Go break it:** https://relay.vladimircuc.com/security
 
-No account needed for the security demos. Want to see the actual product? Hit "Continue with Google" on the login page and you're in. All fake data.
+No account needed for the security lab. To roam the actual product, hit "Continue with Google" on the login page and you're in. All fake data.
 
-## What it is
+## Why I built it
 
-Relay is a real marketing-analytics SaaS I built and shipped at work. I rebranded it and pointed it at a throwaway database loaded with a year of made-up data, so the whole thing is live and clickable but totally harmless. Three full services (Ads, Social, Web and SEO), client switching, an admin panel, charts everywhere.
+I'm into security, and I wanted to see how far AI-assisted development could actually go. Could you build something this big this fast and still have it hold up when someone comes at it? Turns out yes, as long as you treat security as its own job instead of an afterthought. This is me proving that to myself.
 
-Try to change something and you can't. Every save or delete button just opens a popup explaining what it does in the real product and how it's locked down. Nothing on the public version can be touched.
+It's also a real product, not a toy. It's a copy of something I shipped, rebranded and pointed at a database full of fake data, so the whole thing runs for real but can't hurt anyone.
 
-## Why it exists
+## What it actually is
 
-I want a job in application security, and "I build secure software" is impossible for anyone to verify. So I made the security something you can attack.
+Relay is the kind of dashboard a marketing agency lives in to keep tabs on every client at once. It pulls three completely different worlds of data into one place and makes them line up.
 
-The Security Lab drops you into the attacker's seat. You run the moves a real attacker would run, and you watch each one slam into a wall. Every demo is backed by a control that's actually in the code, written in plain English for anyone, with the real mechanism sitting right underneath for the engineers.
+### Paid ads
+Meta ad spend wired together with a CRM into a single funnel. Money in, revenue out, return on ad spend sitting right at the top. There's a leads-by-source breakdown, a full pipeline from first lead to closed deal, and a projection mode that forecasts where the month is going to land. Pick any date range and the whole page recomputes around it.
+
+### Organic social
+Five platforms in one view: Facebook, Instagram, TikTok, YouTube, and LinkedIn. Followers, reach, impressions, engagement, profile visits, the works, sliced per platform or stacked together. Top posts, a heatmap of when posting actually performs, and a connect flow that walks a client through authorizing each account.
+
+### Web and SEO
+Search Console and GA4 sitting side by side: clicks, impressions, click-through rate, average position, keywords, sessions, conversions, traffic sources. On top of that, a live local-rank map that shows where a business really lands across a grid of points on the map, which competitors are beating it, and how the whole picture has moved over twelve months.
+
+### Under the hood
+The dashboards are the easy part to see. Most of the work is everything feeding them:
+
+- A nightly pipeline that pulls from Meta, the CRM, all five social platforms, and three SEO sources, cleans it all up, and stores it as history
+- OAuth connect flows for every platform, each with its own headaches handled (Meta's page picker, TikTok's PKCE, Google's channel selector)
+- PDF reports rendered by a headless browser and branded per client
+- A real admin surface: role-based access with scoped permissions, per-client credentials, CRM pipeline mapping, funnel tuning, and a client lifecycle that makes you type the name to confirm a delete
+- Multi-tenant from the ground up, so one agency's clients can never see another's
+
+The stack is Next.js, TypeScript, Tailwind, and Supabase (Postgres, Auth, and Vault), running on Vercel.
 
 ## The Security Lab
 
-Three demos. All live, all running in your browser on fake data. Here's what you get to try.
+This is the part I'd click first. Three demos, all live, all running in your browser on fake data. You're the attacker. Each one is a real attack, and each one runs face-first into a defense that's actually in the code.
 
 ### Read another company's data
 The app keeps dozens of businesses in one database. You log in as one company and ask for a different company's records.
 
-You get nothing back. Not an error. Not "access denied." Just an empty result, like the data was never there, so you can't even tell the other company exists. Switch to your own company and the exact same request returns everything.
+You get nothing back. Not an error. Not "access denied." Just an empty result, like the data was never there, so you can't even tell the other company exists. Switch to your own company and the exact same request hands you everything.
 
 The rule lives inside the database, underneath the app, so a bug in the code or a stolen key still can't reach what it shouldn't. *(Postgres Row-Level Security.)*
 
@@ -44,9 +62,9 @@ Reports load the client's logo from a web address someone typed in, so the serve
 
 A guard inspects the address before anything happens, sees it points inward, and refuses. That exact gap is what leaked over 100 million records in the Capital One breach. *(Protocol allow-list plus a private, loopback, and cloud-metadata block on every server-side fetch.)*
 
-## What's actually protecting it
+## What's holding it together
 
-It's a copy of a production app, so these are real, shipped controls. Not props for the demo.
+It's a copy of a production app, so these are real, shipped controls. Not staged for the lab.
 
 | Area | What's in place |
 |------|------|
@@ -61,15 +79,13 @@ It's a copy of a production app, so these are real, shipped controls. Not props 
 | **Least privilege** | Locked-down database grants, with a CI check that fails the build if they ever slip |
 | **Edge** | Security headers set in front of the whole app |
 
-Before shipping, I ran a full security review of the app. One critical, eleven smaller. I fixed and re-checked every one.
+I didn't just hope it was secure. I ran the whole thing through security audits, found one critical issue and eleven smaller ones, and fixed and re-checked every one. The lab demos are those controls, confirmed working, that you get to test for yourself.
 
-## How I built it
+## The AI part, since it comes up
 
-Next.js, TypeScript, Tailwind, and Supabase (Postgres, Auth, Vault), running on Vercel.
+I built this with Claude, and I built it fast. Work that would normally eat weeks came together in a tiny slice of that.
 
-I used Claude to build it fast, then went through the whole thing the way I'd go through anyone else's code in a review. Ran the audit, fixed the findings, and added a second layer on top: the demo buttons are dead in the browser, but the server refuses those writes too, so you can't sneak around it with a hand-built request. No keys live in the repo.
-
-The AI wrote a lot of the code. The security calls were all mine, and that gap is the whole point of this project. Anyone can generate code fast now. The part that still takes a person is making sure it actually holds up.
+The point I care about isn't that AI wrote a lot of the code. It's that the result is genuinely secure. People assume AI-built means sloppy and full of holes, and it can be, if you let the model run loose and trust whatever it hands back. So I didn't. I steered it like an engineer and then put the output through real security audits, the same way you'd audit any code before it ships. Used like that, AI doesn't have to be a liability. It can move incredibly fast and still stand up to attack. Relay is the proof I wanted.
 
 ## Safe by design
 
@@ -79,6 +95,6 @@ The AI wrote a lot of the code. The security calls were all mine, and that gap i
 
 ## Me
 
-Vladimir Cuc. OSCP+ and Security+ certified, focused on application security and security engineering.
+Vladimir Cuc. OSCP+ and Security+ certified. I build things like this because breaking and defending software is genuinely the most fun I have.
 
 https://vladimircuc.com
