@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src=".github/cover.png" alt="Relay" width="100%" />
+<img src="public/cover.png" alt="Relay" width="100%" />
 
 # Relay
 

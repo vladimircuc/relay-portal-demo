@@ -39,6 +39,9 @@ function siteVerificationTags(): Record<string, string> {
 }
 
 export const metadata: Metadata = {
+  // Absolute base so the Open Graph / Twitter image URLs resolve to the live
+  // domain (Next needs this to turn /cover.png into a full https URL).
+  metadataBase: new URL("https://relay.vladimircuc.com"),
   // Exactly "Relay" — TikTok app review requires the website title to
   // match the app name verbatim (app name, domain posted-social.com, and this
   // title all align). Inner pages can still set their own titles.
@@ -46,6 +49,24 @@ export const metadata: Metadata = {
   description: "Lead-gen performance dashboard for Relay clients.",
   icons: {
     icon: "/relay-logo.png",
+  },
+  // Link-preview card shown when relay.vladimircuc.com is shared (LinkedIn,
+  // Twitter/X, Slack, etc.). Uses the cyberpunk dashboard cover.
+  openGraph: {
+    type: "website",
+    siteName: "Relay",
+    url: "https://relay.vladimircuc.com",
+    title: "Relay — built with AI, hardened to take a beating",
+    description:
+      "A full analytics platform built with AI, then hardened until it could take a real beating. It's live, and you're invited to attack it.",
+    images: [{ url: "/cover.png", width: 1672, height: 941, alt: "Relay secure analytics dashboard" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Relay — built with AI, hardened to take a beating",
+    description:
+      "A full analytics platform built with AI, then hardened until it could take a real beating. Come try to break it.",
+    images: ["/cover.png"],
   },
   other: siteVerificationTags(),
 };
