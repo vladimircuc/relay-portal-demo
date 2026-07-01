@@ -9,7 +9,7 @@
  */
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, Mail, KeyRound } from "lucide-react";
+import { AlertCircle, Mail, KeyRound, FlaskConical, ArrowRight } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { safeNextPath } from "@/lib/safe-next";
 import { Logo } from "@/components/logo";
@@ -58,13 +58,29 @@ function LoginInner() {
         <Logo size={36} href={null} />
 
         <div className="bg-[var(--surface-1)] border border-[var(--surface-3)]/40 rounded-[var(--radius-card)] p-10 flex flex-col gap-6">
+          {/* Prominent demo notice — this is a public portfolio/testing build, so
+              make it unmistakable that anyone can sign in with no real account. */}
+          <div className="flex items-start gap-3 rounded-lg border border-[var(--ps-yellow)]/50 bg-[color-mix(in_oklab,var(--ps-yellow)_12%,transparent)] px-4 py-3">
+            <FlaskConical size={18} className="mt-0.5 shrink-0 text-[var(--ps-yellow)]" />
+            <div className="flex flex-col gap-1">
+              <p className="text-[13px] font-semibold text-[var(--text-primary)]">
+                Testing demo — this is a placeholder login
+              </p>
+              <p className="text-[12.5px] leading-relaxed text-[var(--text-secondary)]">
+                Anyone can sign in. Every button below logs you straight in as an
+                admin over fake data — no real account or password needed. Type
+                anything, or just click <strong>Enter the demo</strong>.
+              </p>
+            </div>
+          </div>
+
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-2">
               <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
                 Client Dashboard
               </h1>
               <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                Sign in with your company email to access your performance dashboard.
+                Explore the full dashboard, running live on synthetic data.
               </p>
             </div>
             <HowItWorksTip
@@ -87,6 +103,23 @@ function LoginInner() {
               Your email isn&apos;t authorized to access any client dashboards. Contact your Relay rep.
             </div>
           )}
+
+          {/* Primary path — the unmistakable "just get me in" button. */}
+          <button
+            type="button"
+            onClick={enterDemo}
+            disabled={loading}
+            className="inline-flex items-center justify-center gap-2 h-12 rounded-lg bg-[var(--ps-yellow)] text-[var(--text-on-yellow)] text-[15px] font-semibold hover:bg-[var(--ps-yellow-soft)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {loading ? "Signing in…" : "Enter the demo"}
+            {!loading && <ArrowRight size={17} />}
+          </button>
+
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-[var(--surface-3)]/60" />
+            <div className="text-[10px] uppercase tracking-[0.12em] text-[var(--text-tertiary)]">or try the realistic sign-in</div>
+            <div className="h-px flex-1 bg-[var(--surface-3)]/60" />
+          </div>
 
           {/* Google OAuth (demo: drops you in). */}
           <button
@@ -125,14 +158,15 @@ function LoginInner() {
                   enterDemo();
                 }
               }}
-              placeholder="you@yourcompany.com"
+              defaultValue={DEMO_EMAIL}
+              placeholder="anything@example.com — not checked"
               className="h-11 px-4 rounded-lg bg-[var(--surface-0)] border border-[var(--surface-3)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--ps-yellow)] focus:outline-none transition-colors"
             />
             <button
               type="button"
               onClick={enterDemo}
               disabled={loading}
-              className="inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-[var(--ps-yellow)] text-[var(--text-on-yellow)] font-semibold hover:bg-[var(--ps-yellow-soft)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-[var(--surface-2)] text-[var(--text-primary)] border border-[var(--surface-3)] font-medium hover:bg-[var(--surface-3)] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <Mail size={16} />
               {loading ? "Signing in…" : "Send sign-in link"}
@@ -143,7 +177,7 @@ function LoginInner() {
             <span className="rounded border border-[var(--accent-fg)]/40 bg-[color-mix(in_oklab,var(--accent-fg)_12%,transparent)] px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-[var(--accent-fg)]">
               demo
             </span>
-            Any sign-in drops you in as a super-admin over synthetic data.
+            No real authentication runs — see &ldquo;How sign-in works&rdquo; for the production design.
           </div>
 
           {error && (

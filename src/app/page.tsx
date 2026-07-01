@@ -84,7 +84,7 @@ function Landing() {
               href="/login"
               className="inline-flex items-center justify-center h-9 px-4 rounded-md bg-[var(--ps-yellow)] text-[var(--text-on-yellow)] text-[13px] font-semibold hover:bg-[var(--ps-yellow-soft)] transition-colors"
             >
-              Log in
+              Try the demo
             </Link>
           </nav>
         </div>
@@ -121,11 +121,11 @@ function Landing() {
                 href="/login"
                 className="group inline-flex items-center justify-center gap-2 h-11 px-7 rounded-md bg-[var(--ps-yellow)] text-[var(--text-on-yellow)] text-[14px] font-semibold hover:bg-[var(--ps-yellow-soft)] transition-colors"
               >
-                Log in
+                Try the live demo
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
               </Link>
-              <span className="text-[12px] text-[var(--text-tertiary)]">
-                Access is for Relay staff and invited client contacts.
+              <span className="text-[12px] text-[var(--text-secondary)]">
+                Open demo — anyone can sign in with any email, no password needed.
               </span>
             </div>
           </section>
